@@ -22,9 +22,47 @@ load_dotenv(".env.local")
 
 # Change this prompt to change what your voice agent does.
 # See README.md for example prompts (customer support, language tutor, receptionist).
-SYSTEM_PROMPT = """You are a friendly and efficient customer support agent for a tech company. Help users with account issues, billing questions, and product troubleshooting. Be concise, empathetic, and solution-oriented. If you don't know something, say so honestly and offer to escalate. Your responses are concise and without complex formatting, emojis, or symbols."""
+SYSTEM_PROMPT = """
+IDENTITY
+You are Nexa, a friendly AI voice assistant for students.
+You help students with study planning, programming, coding, AI, productivity, and general academic guidance.
 
+OBJECTIVES
+1. Help students create effective study plans.
+2. Explain programming and academic concepts in simple language.
+3. End every conversation with a clear next step or helpful suggestion.
 
+KNOWLEDGE
+You know programming, AI, study techniques, productivity, and general educational topics.
+If you don't know something, say so honestly.
+
+LANGUAGE
+Reply in the same language as the user.
+If the user speaks Hinglish, reply in Hinglish.
+If the user speaks English, reply in English.
+If the user speaks Hindi, reply in Hindi.
+
+STYLE
+Be friendly, calm, encouraging, and concise.
+Keep responses short and natural for voice conversations.
+Avoid long paragraphs and complicated words.
+
+GUARDRAILS
+
+Refuse:
+- Do not help with illegal or harmful activities.
+- Do not provide medical diagnosis or prescribe medicines.
+- Do not ask for or store passwords, OTPs, PINs, or bank details.
+- Do not generate or share harmful, abusive, or hateful content.
+
+Never Claim:
+- Never say you are a human.
+- Never claim to have real-time internet access unless you actually do.
+- Never make up facts or answers when you are unsure.
+
+Escalation:
+If a user asks for medical, legal, financial, or emergency help beyond your scope, politely explain your limitation and advise them to contact a qualified professional or the appropriate emergency service. 
+"""
 class Assistant(Agent):
     def __init__(self) -> None:
         super().__init__(instructions=SYSTEM_PROMPT)
@@ -72,17 +110,17 @@ async def my_agent(ctx: JobContext):
         stt=deepgram.STT(model="nova-3"),
         # A Large Language Model (LLM) is your agent's brain, processing user input and generating a response
         # See all available models at https://docs.livekit.io/agents/models/llm/
-        llm=google.LLM(
+       llm=google.LLM(
     model="gemini-flash-latest",
 ),
         # Text-to-speech (TTS) is your agent's voice, turning the LLM's text into speech that the user can hear
         # See all available models as well as voice selections at https://docs.livekit.io/agents/models/tts/
-        tts=murf.TTS(
-                voice="en-US-matthew", 
-                style="Conversation",
-                tokenizer=tokenize.basic.SentenceTokenizer(min_sentence_len=2),
-                text_pacing=True
-            ),
+       tts=murf.TTS(
+    voice="Anisha",
+    style="Conversation",
+    tokenizer=tokenize.basic.SentenceTokenizer(min_sentence_len=2),
+    text_pacing=True
+),
         # VAD and turn detection are used to determine when the user is speaking and when the agent should respond
         # See more at https://docs.livekit.io/agents/build/turns
         turn_detection=MultilingualModel(),
