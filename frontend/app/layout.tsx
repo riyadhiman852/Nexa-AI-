@@ -51,7 +51,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 
   return (
     <html
-      lang="en"
+      lang="en-IN"
       suppressHydrationWarning
       className={cn(
         publicSans.variable,
@@ -72,32 +72,14 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           disableTransitionOnChange
         >
           <header className="fixed top-0 left-0 z-50 hidden w-full flex-row justify-between p-6 md:flex">
-            <a
-              target="_blank"
-              rel="noopener noreferrer"
-              href="https://livekit.io"
-              className="scale-100 transition-transform duration-300 hover:scale-110"
-            >
+            <div className="flex items-center gap-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={logo} alt={`${companyName} Logo`} className="block size-6 dark:hidden" />
+              <img src={logo} alt={`${companyName} Logo`} className="size-7 dark:hidden" />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={logoDark ?? logo}
-                alt={`${companyName} Logo`}
-                className="hidden size-6 dark:block"
-              />
-            </a>
-            <span className="text-foreground font-mono text-xs font-bold tracking-wider uppercase">
-              Built with{' '}
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://docs.livekit.io/agents"
-                className="underline underline-offset-4"
-              >
-                LiveKit Agents
-              </a>
-            </span>
+              <img src={logoDark ?? logo} alt={`${companyName} Logo`} className="hidden size-7 dark:block" />
+              <span className="text-sm font-semibold tracking-tight">Nexa AI</span>
+            </div>
+            <span className="text-muted-foreground hidden text-xs font-medium sm:block">Your AI Voice Study Companion</span>
           </header>
 
           {children}

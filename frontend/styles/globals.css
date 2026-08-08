@@ -6,24 +6,24 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: #f5f7ff;
+  --foreground: #0f172a;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --primary: #4f46e5;
+  --primary-foreground: #fff;
+  --secondary: #e0e7ff;
+  --secondary-foreground: #3730a3;
+  --muted: #eef2ff;
+  --muted-foreground: #64748b;
+  --accent: #dbeafe;
+  --accent-foreground: #1e3a8a;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: #e1e7f5;
+  --input: #e1e7f5;
+  --ring: #6366f1;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -40,14 +40,14 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.269 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+  --background: #0b1120;
+  --foreground: #e7ecfb;
+  --card: #121a2e;
+  --card-foreground: #e7ecfb;
+  --popover: #121a2e;
+  --popover-foreground: #e7ecfb;
+  --primary: #818cf8;
+  --primary-foreground: #0b1120;
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -122,3 +122,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+.nexa-card { @apply rounded-2xl border border-border/70 bg-card/85 shadow-lg shadow-primary/5 backdrop-blur-xl; }
+.nexa-chip { @apply inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-primary/5 px-3 py-1 text-xs font-medium text-foreground/80; }
+}
+@keyframes nexa-float { 0%,100%{transform:translate3d(0,0,0) scale(1)} 50%{transform:translate3d(0,-16px,0) scale(1.03)} }
+.nexa-blob { position:absolute; pointer-events:none; border-radius:9999px; filter:blur(75px); opacity:.45; animation:nexa-float 14s ease-in-out infinite; }
+.nexa-blob-a { top:-12%; left:-8%; width:22rem; height:22rem; background:color-mix(in srgb,#4f46e5 45%,transparent); }
+.nexa-blob-b { right:-10%; bottom:-14%; width:26rem; height:26rem; background:color-mix(in srgb,#38bdf8 35%,transparent); animation-delay:-7s; }
+.dark .nexa-blob { opacity:.22; }
