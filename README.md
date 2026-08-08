@@ -1,275 +1,768 @@
-# Voice Agent Starter — Powered by Murf Falcon
+# 🤖 Nexa AI
 
-Build a production voice AI agent in 5 minutes. Powered by the fastest TTS on the market - swap the system prompt to build anything from customer support to language tutors.
+### Multilingual Voice AI Learning Assistant
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Murf Falcon](https://img.shields.io/badge/TTS-Murf%20Falcon-6366F1)](https://murf.ai/api/docs/text-to-speech/streaming) [![LiveKit](https://img.shields.io/badge/Transport-LiveKit-002cf2)](https://docs.livekit.io) [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-
----
-
-## Why Murf Falcon
-
-- **55ms model latency** - fastest production TTS
-- **130ms time-to-first-audio** across 10+ global regions
-- **$0.01/1000 characters** - up to 10x cheaper than alternatives
-- **150+ voices** across 35+ languages
-- **99.38% pronunciation accuracy**
+*An intelligent, real-time voice assistant designed to make learning, literacy, coding, and AI assistance more accessible through natural voice conversations.*
 
 ---
 
-## Architecture
+## 📑 Table of Contents
 
-```mermaid
-flowchart LR
-    A[🎙️ User speaks] -->|audio| B[Deepgram STT]
-    B -->|text| C[LLM]
-    C -->|response text| D[Murf Falcon TTS]
-    D -->|audio| E[LiveKit]
-    E -->|stream| F[🔊 User hears]
+* [🚧 Project Status](#-project-status)
+* [✨ Project Highlights](#-project-highlights)
+* [📌 Overview](#-overview)
+* [❓ Why Nexa AI?](#-why-nexa-ai)
+* [✨ Features](#-features)
+* [🏗️ Architecture](#️-architecture)
+* [🎙️ Voice Pipeline](#️-voice-pipeline)
+* [💻 Full Tech Stack](#-full-tech-stack)
+* [📂 Project Structure](#-project-structure)
+* [🛠️ Installation & Setup](#️-installation--setup)
+* [🔐 Environment Variables](#-environment-variables)
+* [▶️ Running the Application](#️-running-the-application)
+* [🧠 AI Agent Personality](#-ai-agent-personality)
+* [🌐 Multilingual & Mixed-Language Interaction](#-multilingual--mixed-language-interaction)
+* [🚀 Challenge Progress & Changelog](#-challenge-progress--changelog)
+* [🗺️ Future Roadmap](#️-future-roadmap)
+* [🤝 Contributing](#-contributing)
+* [📜 Built With & Acknowledgements](#-built-with--acknowledgements)
+* [⚠️ Disclaimer](#️-disclaimer)
+* [📄 License](#-license)
+* [👩‍💻 Author](#-author)
 
-    style A fill:#444441,stroke:#888780,color:#fff
-    style B fill:#185FA5,stroke:#85B7EB,color:#fff
-    style C fill:#534AB7,stroke:#AFA9EC,color:#fff
-    style D fill:#0F6E56,stroke:#5DCAA5,color:#fff
-    style E fill:#D85A30,stroke:#F0997B,color:#fff
-    style F fill:#444441,stroke:#888780,color:#fff
+---
+
+## 🚧 Project Status
+
+**Nexa AI is under active development as part of the VoiceForBharat 2026 Challenge.**
+
+The project is being developed incrementally, with new voice AI capabilities, agent improvements, and learning-focused functionality being added throughout the challenge.
+
+| Status                        | Progress    |
+| ----------------------------- | ----------- |
+| 🟢 Active Development         | Day 2       |
+| 🎙️ Voice Agent               | Implemented |
+| ⚡ Real-Time Audio             | Implemented |
+| 🧠 AI Agent                   | Implemented |
+| 🔊 Murf Falcon TTS            | Implemented |
+| 🌐 Mixed-Language Interaction | Supported   |
+| 📚 Learning Assistance        | Implemented |
+| 💻 Coding Assistance          | Implemented |
+
+---
+
+## ✨ Project Highlights
+
+* 🎙️ **Real-Time Voice AI** — Natural two-way voice interaction.
+* ⚡ **Fast Voice Generation** — Powered by Murf Falcon TTS.
+* 🌐 **Mixed-Language Conversations** — Designed for natural code-switching between languages.
+* 📚 **Learning & Literacy Support** — Built around accessible educational assistance.
+* 💻 **Programming Assistant** — Helps users understand coding and programming concepts.
+* 🧠 **AI-Powered Reasoning** — Uses Google AI APIs for conversational intelligence.
+* 🔊 **Speech Recognition** — Real-time speech-to-text using Deepgram.
+* 🌐 **WebRTC Communication** — LiveKit provides the real-time audio infrastructure.
+* 🛡️ **Agent Guardrails** — Dedicated personality and behavioral instructions for safe, helpful responses.
+* 🐍 **Python Voice Agent Backend** — Built using the LiveKit Agents ecosystem.
+* ⚛️ **Modern Web Frontend** — Voice-first web application interface.
+
+---
+
+## 📌 Overview
+
+**Nexa AI** is a real-time, voice-first AI assistant focused on **learning, literacy, programming, and general AI assistance**.
+
+Instead of requiring users to type every question, Nexa AI allows them to communicate naturally through voice.
+
+The system combines speech recognition, AI reasoning, and fast speech synthesis into a single conversational pipeline.
+
+Users can:
+
+* Ask educational questions
+* Learn programming concepts
+* Get coding assistance
+* Ask general AI questions
+* Have natural voice conversations
+* Communicate using mixed-language speech
+
+The core idea is simple:
+
+> **Make AI-powered learning easier to access through natural voice interaction.**
+
+---
+
+## ❓ Why Nexa AI?
+
+### 1. 🎙️ Voice-First Learning
+
+Typing can create an unnecessary barrier between a learner and an AI assistant.
+
+Nexa AI allows users to simply **speak their questions** and receive spoken responses.
+
+### 2. 📚 Learning & Literacy
+
+Nexa AI is designed to support users who want help with:
+
+* Academic learning
+* Concept explanations
+* Study assistance
+* General knowledge
+* Programming education
+
+### 3. 💻 Coding Assistance
+
+Learning programming often involves repeatedly asking questions about syntax, concepts, errors, and implementation.
+
+Nexa AI provides conversational programming assistance to help learners understand these concepts.
+
+### 4. 🌐 Natural Mixed-Language Communication
+
+Many users naturally switch between languages while speaking.
+
+Nexa AI is designed to support this kind of **code-switching / mixed-language communication**, making conversations feel more natural.
+
+For example:
+
+```text
+"Mujhe Python functions simple language mein explain karo."
+```
+
+### 5. ⚡ Fast Voice Experience
+
+A voice assistant needs to respond quickly to feel conversational.
+
+Nexa AI uses **Murf Falcon** for fast text-to-speech generation and combines it with a real-time LiveKit audio pipeline.
+
+---
+
+## ✨ Features
+
+### 🎙️ Voice Interaction
+
+* Real-time voice conversations
+* Speech-to-text processing
+* AI-generated responses
+* Text-to-speech output
+* Full conversational voice pipeline
+
+### 📚 Learning Assistance
+
+* Concept explanations
+* Study-related questions
+* Educational guidance
+* Beginner-friendly explanations
+* General literacy assistance
+
+### 💻 Coding & Programming
+
+* Programming concept explanations
+* Coding questions
+* Beginner programming guidance
+* Debugging assistance
+* Technical explanations in conversational language
+
+### 🤖 General AI Assistance
+
+* General questions
+* Knowledge-based conversations
+* Productivity-related assistance
+* AI-related questions
+* Natural conversational interaction
+
+### 🌐 Mixed-Language Conversations
+
+Nexa AI is designed to handle natural language switching during conversations.
+
+Examples include:
+
+```text
+"Haan, mujhe Python ka loop explain karo."
+
+"Can you explain this concept in simple Hindi?"
+
+"Java mein ye error kyun aa raha hai?"
+```
+
+### 🛡️ AI Agent Guardrails
+
+The agent includes dedicated instructions for:
+
+* Consistent personality
+* Helpful responses
+* Student-friendly communication
+* Educational guidance
+* Appropriate conversational behavior
+
+---
+
+# 🏗️ Architecture
+
+Nexa AI follows a real-time voice agent architecture connecting the web client, LiveKit, speech recognition, AI reasoning, and voice synthesis.
+
+```text
+                         ┌──────────────────┐
+                         │      USER        │
+                         │   🎙️ Voice Input │
+                         └────────┬─────────┘
+                                  │
+                                  ▼
+                         ┌──────────────────┐
+                         │    FRONTEND      │
+                         │  Web Voice UI    │
+                         └────────┬─────────┘
+                                  │
+                                  ▼
+                         ┌──────────────────┐
+                         │     LIVEKIT      │
+                         │ WebRTC / Audio   │
+                         └────────┬─────────┘
+                                  │
+                                  ▼
+                         ┌──────────────────┐
+                         │   NEXA AI AGENT  │
+                         │ Python Backend   │
+                         └───────┬──────────┘
+                                 │
+                    ┌────────────┼────────────┐
+                    │            │            │
+                    ▼            ▼            ▼
+             ┌───────────┐ ┌──────────┐ ┌───────────┐
+             │ Deepgram  │ │ Google AI│ │   Agent   │
+             │    STT    │ │   LLM    │ │ Guardrails│
+             └─────┬─────┘ └────┬─────┘ └───────────┘
+                   │             │
+                   └──────┬──────┘
+                          ▼
+                   ┌──────────────┐
+                   │ Murf Falcon  │
+                   │     TTS      │
+                   └──────┬───────┘
+                          │
+                          ▼
+                   🔊 Voice Response
+                          │
+                          ▼
+                         USER
 ```
 
 ---
 
-## Quickstart
+# 🎙️ Voice Pipeline
 
-### Prerequisites
+The Nexa AI voice interaction pipeline consists of multiple real-time components:
 
-- **Python** 3.10+
-- **[uv](https://docs.astral.sh/uv/)** - fast Python package manager
-  ```bash
-  # macOS/Linux
-  curl -LsSf https://astral.sh/uv/install.sh | sh
-  # Windows (PowerShell)
-  powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
-  ```
-- **Node.js** 18+
-- **pnpm** — fast Node package manager
-  ```bash
-  npm install -g pnpm
-  ```
-- A [LiveKit](https://cloud.livekit.io/) project (free tier available)
-
-### Step 1: Clone the repo
-
-```bash
-git clone https://github.com/murf-ai/murf-livekit-starter.git
-cd murf-livekit-starter
+```text
+[User Speech]
+      │
+      ▼
+[LiveKit WebRTC]
+      │
+      ▼
+[Deepgram STT]
+      │
+      ▼
+[Google AI / LLM]
+      │
+      ▼
+[Nexa AI Agent Logic]
+      │
+      ▼
+[Murf Falcon TTS]
+      │
+      ▼
+[LiveKit Audio Stream]
+      │
+      ▼
+[User Hears Response]
 ```
 
-### Step 2: Set up environment variables
+### 1. Speech Recognition
 
-Create `.env.local` in both `backend/` and `frontend/` (copy from `.env.example` in each). You need:
+**Deepgram** converts incoming voice into text in real time.
 
-| Variable | Where to get it | Required |
-|----------|-----------------|----------|
-| `LIVEKIT_URL` | LiveKit Cloud dashboard | Yes |
-| `LIVEKIT_API_KEY` | LiveKit Cloud dashboard | Yes |
-| `LIVEKIT_API_SECRET` | LiveKit Cloud dashboard | Yes |
-| `MURF_API_KEY` | [murf.ai/api/dashboard](https://murf.ai/api/dashboard) | Yes |
-| `DEEPGRAM_API_KEY` | [deepgram.com](https://deepgram.com) | Yes |
-| `GOOGLE_API_KEY` (or `OPENAI_API_KEY`) | Depends on LLM choice | Yes |
+### 2. AI Reasoning
 
-### Step 3: Install backend dependencies
+**Google AI APIs** process the user's request and generate the conversational response.
+
+### 3. Agent Logic
+
+The Python-based Nexa AI agent applies its system instructions, personality, and behavioral guardrails.
+
+### 4. Voice Synthesis
+
+**Murf Falcon** converts the generated response into natural speech.
+
+### 5. Real-Time Transport
+
+**LiveKit** handles the real-time audio communication between the frontend and the voice agent.
+
+---
+
+# 💻 Full Tech Stack
+
+## 🎨 Frontend
+
+| Technology             | Purpose                        |
+| ---------------------- | ------------------------------ |
+| **Next.js**            | Frontend application framework |
+| **React**              | User interface components      |
+| **TypeScript**         | Type-safe frontend development |
+| **Tailwind CSS**       | UI styling                     |
+| **LiveKit Client SDK** | Real-time voice communication  |
+| **pnpm**               | Frontend package management    |
+
+### Frontend Responsibilities
+
+The frontend handles:
+
+* Voice interface
+* User interaction
+* LiveKit connection
+* Audio communication
+* Agent session interface
+* Real-time conversation experience
+
+---
+
+## 🐍 Backend
+
+| Technology             | Purpose                       |
+| ---------------------- | ----------------------------- |
+| **Python 3.11+**       | Backend agent runtime         |
+| **LiveKit Agents SDK** | Voice AI agent framework      |
+| **uv**                 | Python dependency management  |
+| **Pyproject.toml**     | Backend project configuration |
+
+### Backend Responsibilities
+
+The backend voice agent handles:
+
+* Voice session management
+* Agent behavior
+* AI model interaction
+* Speech pipeline orchestration
+* System prompt
+* Personality
+* Guardrails
+* TTS integration
+
+---
+
+## 🧠 Artificial Intelligence
+
+| Technology             | Purpose                          |
+| ---------------------- | -------------------------------- |
+| **Google AI / Gemini** | Large Language Model / reasoning |
+| **Deepgram**           | Speech-to-Text                   |
+| **Murf Falcon**        | Text-to-Speech                   |
+
+---
+
+## 🔊 Voice & Real-Time Infrastructure
+
+| Technology         | Purpose                      |
+| ------------------ | ---------------------------- |
+| **Murf Falcon**    | Fast voice synthesis         |
+| **Deepgram**       | Real-time speech recognition |
+| **LiveKit Cloud**  | WebRTC audio transport       |
+| **LiveKit Agents** | Real-time AI agent framework |
+
+---
+
+## 🛠️ Development Tools
+
+| Tool           | Purpose                                      |
+| -------------- | -------------------------------------------- |
+| **Git**        | Version control                              |
+| **GitHub**     | Source code hosting                          |
+| **VS Code**    | Development environment                      |
+| **PowerShell** | Windows development / startup                |
+| **uv**         | Python environment and dependency management |
+| **pnpm**       | JavaScript package management                |
+
+---
+
+# 📂 Project Structure
+
+```text
+Nexa-AI/
+│
+├── backend/
+│   ├── src/
+│   │   └── agent.py
+│   │
+│   ├── pyproject.toml
+│   ├── uv.lock
+│   └── ...
+│
+├── frontend/
+│   ├── app/
+│   ├── components/
+│   ├── public/
+│   ├── package.json
+│   └── ...
+│
+├── .gitignore
+├── AGENTS.md
+├── LICENSE
+├── README.md
+├── start_app.ps1
+└── start_app.sh
+```
+
+---
+
+# 🛠️ Installation & Setup
+
+## Prerequisites
+
+Before running Nexa AI, install:
+
+* **Python 3.11+**
+* **Node.js**
+* **pnpm**
+* **uv**
+* **Git**
+* **LiveKit Cloud account**
+* **Murf API key**
+* **Deepgram API key**
+* **Google AI API key**
+
+---
+
+## Step 1: Clone the Repository
 
 ```bash
+git clone https://github.com/riyadhiman852/Nexa-AI-.git
+cd Nexa-AI-
+```
+
+---
+
+## Step 2: Backend Setup
+
+```powershell
 cd backend
-uv sync
-uv run python src/agent.py download-files
 ```
 
-### Step 4: Install frontend dependencies
+Create/activate the Python environment:
 
-```bash
+```powershell
+uv sync
+```
+
+Activate the environment if required:
+
+```powershell
+.\.venv\Scripts\activate
+```
+
+---
+
+## Step 3: Configure Environment Variables
+
+Create the required environment configuration in the backend.
+
+Example:
+
+```env
+LIVEKIT_URL=wss://your-project.livekit.cloud
+LIVEKIT_API_KEY=your_livekit_api_key
+LIVEKIT_API_SECRET=your_livekit_api_secret
+
+MURF_API_KEY=your_murf_api_key
+DEEPGRAM_API_KEY=your_deepgram_api_key
+GOOGLE_API_KEY=your_google_api_key
+```
+
+> **Never commit API keys or secrets to GitHub.**
+
+Keep `.env` and `.env.local` files private.
+
+---
+
+## Step 4: Start the Backend Agent
+
+From the `backend` directory:
+
+```powershell
+uv run python src/agent.py dev
+```
+
+Or using the LiveKit CLI:
+
+```powershell
+lk agent dev
+```
+
+---
+
+## Step 5: Start the Frontend
+
+Open another terminal:
+
+```powershell
 cd frontend
+```
+
+Install dependencies:
+
+```powershell
 pnpm install
 ```
 
-### Step 5: Run it
+Start the development server:
 
-**Option A - All-in-one (from repo root):**
+```powershell
+pnpm dev
+```
+
+Open the local URL displayed by the frontend development server.
+
+---
+
+# 🔐 Environment Variables
+
+Nexa AI requires credentials for the external services used by the voice pipeline.
+
+| Variable             | Service   | Purpose            |
+| -------------------- | --------- | ------------------ |
+| `LIVEKIT_URL`        | LiveKit   | WebRTC server URL  |
+| `LIVEKIT_API_KEY`    | LiveKit   | API authentication |
+| `LIVEKIT_API_SECRET` | LiveKit   | API authentication |
+| `MURF_API_KEY`       | Murf      | Voice synthesis    |
+| `DEEPGRAM_API_KEY`   | Deepgram  | Speech recognition |
+| `GOOGLE_API_KEY`     | Google AI | AI model access    |
+
+### Security Notice
+
+Do **not** upload:
+
+```text
+.env
+.env.local
+.env.production
+```
+
+or any file containing private API credentials.
+
+---
+
+# ▶️ Running the Application
+
+Nexa AI requires two primary services during local development:
+
+### Terminal 1 — Backend
+
+```powershell
+cd backend
+uv run python src/agent.py dev
+```
+
+### Terminal 2 — Frontend
+
+```powershell
+cd frontend
+pnpm dev
+```
+
+Then open the frontend development URL in your browser.
+
+---
+
+# 🧠 AI Agent Personality
+
+Nexa AI uses a dedicated system prompt to define the assistant's behavior.
+
+The agent is designed to be:
+
+* Friendly
+* Helpful
+* Student-focused
+* Educational
+* Conversational
+* Clear and easy to understand
+
+The personality and guardrails are maintained on the backend so the agent can consistently follow its intended behavior.
+
+---
+
+# 🌐 Multilingual & Mixed-Language Interaction
+
+One of Nexa AI's key goals is to support the way people naturally communicate.
+
+Users may combine languages within the same conversation instead of being forced to communicate in one language.
+
+Examples:
+
+```text
+"Mujhe machine learning simple words mein samjhao."
+
+"Can you explain recursion thoda easy way mein?"
+
+"Python mein list aur tuple ka difference kya hai?"
+```
+
+This makes Nexa AI particularly useful for learners who are more comfortable using a combination of English and Indian languages.
+
+---
+
+# 🚀 Challenge Progress & Changelog
+
+Nexa AI is being developed incrementally as part of the **VoiceForBharat 2026 Challenge**.
+
+| Day        | Status      | Progress                                       |
+| ---------- | ----------- | ---------------------------------------------- |
+| **Day 1**  | ✅ Completed | Initial real-time voice agent with Murf Falcon |
+| **Day 2**  | ✅ Completed | Agent personality and behavioral guardrails    |
+| **Day 3**  | 🔄 Next     | Further voice agent improvements               |
+| **Day 4**  | ⏳ Planned   | TBD                                            |
+| **Day 5**  | ⏳ Planned   | TBD                                            |
+| **Day 6**  | ⏳ Planned   | TBD                                            |
+| **Day 7**  | ⏳ Planned   | TBD                                            |
+| **Day 8**  | ⏳ Planned   | TBD                                            |
+| **Day 9**  | ⏳ Planned   | TBD                                            |
+| **Day 10** | ⏳ Planned   | Final showcase                                 |
+
+### 📜 Day 1
+
+* Set up the initial Nexa AI voice agent.
+* Integrated LiveKit real-time communication.
+* Integrated Deepgram speech recognition.
+* Integrated Google AI.
+* Integrated Murf Falcon TTS.
+* Established the real-time voice pipeline.
+* Created the initial web interface.
+
+### 📜 Day 2
+
+* Added Nexa AI agent personality.
+* Added educational/student-focused behavior.
+* Added conversational guardrails.
+* Improved the system prompt.
+* Refined the agent's response behavior.
+
+---
+
+# 🗺️ Future Roadmap
+
+### 🎙️ Voice Improvements
+
+* Improved response latency
+* More natural conversational turn-taking
+* Better interruption handling
+* Improved voice quality
+
+### 🌐 Language Support
+
+* Expanded Indian language support
+* Better Hindi-English code-switching
+* Regional language interaction
+
+### 📚 Learning Features
+
+* Personalized study assistance
+* Subject-specific learning modes
+* Learning progress tracking
+* Interactive educational conversations
+
+### 💻 Developer Assistance
+
+* Better code explanation
+* Debugging assistance
+* Programming learning modes
+* Beginner-friendly coding tutorials
+
+### 🤖 AI Improvements
+
+* Better contextual memory
+* More reliable responses
+* Improved agent reasoning
+* Specialized learning personas
+
+---
+
+# 🤝 Contributing
+
+Contributions are welcome!
+
+### 1. Fork the repository
 
 ```bash
-# macOS/Linux
-chmod +x start_app.sh
-./start_app.sh
-
-# Windows (PowerShell)
-.\start_app.ps1
+git fork https://github.com/riyadhiman852/Nexa-AI-.git
 ```
 
-**Option B - Separate terminals:**
+### 2. Create a feature branch
 
 ```bash
-# Terminal 1 — LiveKit Server
-livekit-server --dev
-
-# Terminal 2 — Backend agent
-cd backend && uv run python src/agent.py dev
-
-# Terminal 3 — Frontend
-cd frontend && pnpm dev
+git checkout -b feature/your-feature
 ```
 
-Then open **http://localhost:3000** in your browser.
+### 3. Make your changes
 
-You should now see the voice agent UI. Click **Start talking**, allow microphone access, and speak — the agent will respond with Murf Falcon TTS. Ensure your backend and (if using Option B) LiveKit server are running.
+### 4. Commit your changes
+
+```bash
+git add .
+git commit -m "Add your feature"
+```
+
+### 5. Push the branch
+
+```bash
+git push origin feature/your-feature
+```
+
+### 6. Open a Pull Request
+
+Please describe what you changed and why the change is useful.
 
 ---
 
-## Deploy
+# 📜 Built With & Acknowledgements
 
-Want to deploy this beyond localhost? You'll need to deploy **two services**: the backend agent and the frontend. Both must use the same LiveKit project.
+Nexa AI is powered by several technologies and open-source platforms:
 
-> This is a two-service app — the backend agent and the frontend UI deploy separately. You'll need both running and connected to the same LiveKit project.
+* **Murf AI** — Murf Falcon text-to-speech
+* **LiveKit** — Real-time WebRTC infrastructure and Agents SDK
+* **Deepgram** — Speech recognition
+* **Google AI** — AI/LLM capabilities
+* **Python** — Voice agent backend
+* **Next.js & React** — Web frontend
 
-### Backend (Python agent) — Deploy to Railway
-
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/tIVCF1?referralCode=cNjn2P&utm_medium=integration&utm_source=template&utm_campaign=generic)
-
-Set these environment variables in Railway:
-
-- `MURF_API_KEY`
-- `DEEPGRAM_API_KEY`
-- `GOOGLE_API_KEY` or `OPENAI_API_KEY`
-- `LIVEKIT_URL`
-- `LIVEKIT_API_KEY`
-- `LIVEKIT_API_SECRET`
-
-The backend runs as a long-lived Python process that connects to LiveKit as an agent. Railway handles this well.
-
-### Frontend (Next.js) — Deploy to Vercel
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/murf-ai/murf-livekit-starter&root-directory=frontend&env=LIVEKIT_URL,LIVEKIT_API_KEY,LIVEKIT_API_SECRET&project-name=murf-voice-agent&repository-name=murf-voice-agent)
-
-Set these environment variables in Vercel:
-
-- `LIVEKIT_URL`
-- `LIVEKIT_API_KEY`
-- `LIVEKIT_API_SECRET`
-- `AGENT_NAME` (optional — for explicit agent dispatch)
-
-The frontend is a standard Next.js app. Point it at the same LiveKit instance your backend agent is connected to.
-
-### Connecting them
-
-The frontend and backend don't call each other directly — they both connect to **LiveKit**, which handles the real-time audio transport.
-
-1. Use the **same** `LIVEKIT_URL`, `LIVEKIT_API_KEY`, and `LIVEKIT_API_SECRET` on both Railway and Vercel
-2. Set `AGENT_NAME=my-agent` on Vercel — this matches the `agent_name="my-agent"` registered in `backend/src/agent.py`
-3. Verify: Railway logs should show the agent connected to LiveKit. Open your Vercel URL, click **Start talking** — the agent should respond
-
-If the agent doesn't connect, double-check that both services point to the same LiveKit project and that the backend is running (check Railway logs).
+Special thanks to the teams building the tools and infrastructure that make real-time voice AI applications possible.
 
 ---
 
-## Change the Use Case
+# ⚠️ Disclaimer
 
-The default system prompt makes this a **customer support agent**. You can change the agent’s behavior by editing the prompt.
+Nexa AI is an **educational and experimental voice AI project** developed as part of the VoiceForBharat 2026 Challenge.
 
-**Where the prompt lives:** `backend/src/agent.py`- the `SYSTEM_PROMPT` constant (near the top of the file, after the imports). Change that string to change what your voice agent does.
-
-### Example prompts (copy-paste)
-
-**Customer Support (default):**
-
-```
-You are a friendly and efficient customer support agent for a tech company. Help users with account issues, billing questions, and product troubleshooting. Be concise, empathetic, and solution-oriented. If you don't know something, say so honestly and offer to escalate.
-```
-
-**Language Tutor:**
-
-```
-You are a patient and encouraging language tutor helping the user practice conversational Spanish. Speak primarily in Spanish but switch to English to explain grammar or vocabulary when needed. Correct mistakes gently and suggest better phrasing. Keep conversations natural and fun.
-```
-
-**AI Receptionist:**
-
-```
-You are a professional receptionist for a medical clinic. Help callers schedule appointments, answer questions about office hours and services, and take messages for doctors. Be warm but efficient. Ask for the caller's name and reason for calling upfront.
-```
-
-See the Configuration section below for voice, STT, and LLM options.
+AI-generated responses may occasionally be inaccurate. Users should independently verify important information and should not rely on Nexa AI as a substitute for qualified professional advice.
 
 ---
 
-## Configuration
+# 📄 License
 
-### Murf voice
-
-Edit the `tts=murf.TTS(...)` call in `backend/src/agent.py`. Set the `voice` argument to any Murf voice ID. Examples:
-
-- `en-US-natalie` — US English (female)
-- `en-UK-ruby` — UK English (female)
-- `en-US-miles` — US English (male)
-- `en-US-matthew` — US English (male, default in this starter)
-
-Browse all voices: [Murf Voice Library](https://murf.ai/api/docs/voices-styles/voice-library).
-
-### STT provider
-
-STT is configured in `backend/src/agent.py` in the `AgentSession(stt=...)` call. The default is Deepgram (`deepgram.STT(model="nova-3")`). You can swap to another LiveKit-compatible STT plugin if needed.
-
-### LLM (Gemini vs OpenAI)
-
-- **Gemini (default):** Set `GOOGLE_API_KEY` and use `llm=google.LLM(model="gemini-2.5-flash")` in `agent.py`.
-- **OpenAI:** Set `OPENAI_API_KEY`, add the OpenAI plugin, and use the corresponding `llm=openai.LLM(...)` in `agent.py`.
-
-### Audio format
-
-Murf Falcon and LiveKit handle audio format internally. For advanced options, see [Murf API docs](https://murf.ai/api/docs) and [LiveKit docs](https://docs.livekit.io).
+This project is licensed under the terms specified in the [`LICENSE`](LICENSE) file.
 
 ---
 
-## Project Structure
+# 👩‍💻 Author
 
-```
-murf-livekit-starter/
-├── backend/                 # Python voice agent (LiveKit Agents + Murf Falcon)
-│   ├── src/
-│   │   └── agent.py         # Agent entrypoint, pipeline (STT/LLM/TTS), system prompt
-│   ├── tests/               # Agent tests
-│   ├── .env.example         # Backend env template
-│   ├── pyproject.toml       # Python deps (uv)
-│   └── railway.toml         # Railway deploy config
-├── frontend/                # Next.js UI for voice sessions
-│   ├── app/
-│   │   ├── page.tsx         # Main page
-│   │   └── api/token/       # LiveKit token endpoint (dev)
-│   ├── components/          # UI (agents-ui, app config, theme)
-│   ├── app-config.ts        # Branding, title, button text, accent
-│   ├── .env.example         # Frontend env template
-│   └── package.json         # Node deps (pnpm)
-├── start_app.sh             # Start LiveKit + backend + frontend (macOS/Linux)
-├── start_app.ps1            # Start LiveKit + backend + frontend (Windows)
-├── README.md                # This file
-```
+**Riya Dhiman**
 
-For deeper documentation on each part, see:
+BCA AI/ML Student & AI Developer
 
-- [Backend Documentation](./backend/README.md) — agent pipeline, voice/LLM/STT configuration, testing, deployment
-- [Frontend Documentation](./frontend/README.md) — UI customization, visualizers, theming, component architecture
+Building and exploring:
 
----
+* 🤖 Artificial Intelligence
+* 🎙️ Voice AI
+* 🧠 Generative AI
+* 💻 Programming
+* 📚 AI-powered learning tools
 
-## Links
+### 🔗 Project
 
-- [Murf API Docs](https://murf.ai/api/docs)
-- [Murf Voice Library](https://murf.ai/api/docs/voices-styles/voice-library)
-- [LiveKit Docs](https://docs.livekit.io)
-- [Deepgram Docs](https://developers.deepgram.com)
-- [Murf Falcon Benchmarks](https://murf.ai/falcon/benchmarks)
-- [TTS Latency Benchmarker](https://github.com/sahilsgupta/tts-latency-benchmarker) — run your own p50/p95 tests across providers
-- [Murf Discord](https://discord.gg/FbKAy96Sz7)
-- [Murf Startup Incubator](https://murf.ai/api) — 50M free characters for startups
+**Nexa AI — Multilingual Voice AI Learning Assistant**
 
----
-
-## License
-
-MIT
+⭐ If you find Nexa AI interesting, consider starring the repository and sharing your feedback!
