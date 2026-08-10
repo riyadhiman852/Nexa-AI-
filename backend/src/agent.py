@@ -118,6 +118,30 @@ Not:
 
 "Namaste, aapka swagat hai."
 
+TOOLS
+
+You have access to a learning exercise tool called get_next_exercise.
+
+Use get_next_exercise automatically when the student asks for:
+- a practice question
+- a quiz
+- an exercise
+- coding practice
+- a question at a particular difficulty level
+
+For example:
+- "Give me a beginner Python question."
+- "Quiz me on JavaScript."
+- "I want an intermediate Python exercise."
+
+When using the tool:
+- Do not read the returned JSON aloud.
+- Convert the result into a natural conversational response.
+- Give the question and options clearly.
+- Do not invent exercise data if the tool fails.
+- If the tool reports that data is unavailable, explain that naturally and suggest another supported topic or level.
+- Mention that the exercise comes from the local educational practice dataset when relevant.
+
 KNOWLEDGE
 
 You know programming, AI, study techniques, productivity, and general educational topics.
@@ -166,7 +190,66 @@ ESCALATION
 If a user asks for medical, legal, financial, or emergency help beyond your scope, politely explain your limitation and advise them to contact an appropriate qualified professional or service.
 """
 
-
+EXERCISES = {
+    "python": {
+        "beginner": [
+            {
+                "question": "What is the correct way to print Hello World in Python?",
+                "options": [
+                    "A. print('Hello World')",
+                    "B. echo('Hello World')",
+                    "C. printf('Hello World')",
+                    "D. console.log('Hello World')",
+                ],
+                "answer": "A",
+                "explanation": "In Python, the print function is used to display text."
+            }
+        ],
+        "intermediate": [
+            {
+                "question": "Which Python data structure stores key-value pairs?",
+                "options": [
+                    "A. List",
+                    "B. Tuple",
+                    "C. Dictionary",
+                    "D. Set",
+                ],
+                "answer": "C",
+                "explanation": "A dictionary stores data as key-value pairs."
+            }
+        ]
+    },
+    "javascript": {
+        "beginner": [
+            {
+                "question": "Which keyword is commonly used to declare a variable in JavaScript?",
+                "options": [
+                    "A. variable",
+                    "B. let",
+                    "C. define",
+                    "D. int",
+                ],
+                "answer": "B",
+                "explanation": "The let keyword declares a block-scoped variable."
+            }
+        ]
+    },
+    "ai": {
+        "beginner": [
+            {
+                "question": "What does AI stand for?",
+                "options": [
+                    "A. Automated Internet",
+                    "B. Artificial Intelligence",
+                    "C. Advanced Information",
+                    "D. Automated Intelligence",
+                ],
+                "answer": "B",
+                "explanation": "AI stands for Artificial Intelligence."
+            }
+        ]
+    }
+}
 class Assistant(Agent):
     def __init__(self, user_id: str, user_memory=None) -> None:
         self.user_id = user_id
@@ -206,7 +289,76 @@ Do not invent information that is not present here.
 
 {json.dumps(self.user_memory, ensure_ascii=False, indent=2)}
 """
+    @function_tool
+    async def get_next_exercise(
+        self,
+        context: RunContext,
+        topic: str,
+        level: str,
+    ) -> str:
+        """Fetch the next practice exercise for a student's topic and level.
 
+        Use this tool when the student asks for a practice question,
+        quiz question, exercise, or coding practice for a specific topic
+        and difficulty level.
+
+        The tool should be used automatically when the student requests
+        an exercise instead of generating one from general knowledge.
+
+        Args:
+            topic: The learning topic, such as python, javascript, or ai.
+            level: The difficulty level, such as beginner or intermediate.
+        """
+
+        logger.info(
+            "Fetching exercise: topic=%s level=%s",
+            topic,
+            level,
+        )
+
+        try:
+            topic_key = topic.strip().lower()
+            level_key = level.strip().lower()
+
+            topic_data = EXERCISES.get(topic_key)
+
+            if not topic_data:
+                return (
+                    f"I don't currently have a practice exercise for "
+                    f"{topic}. Please try Python, JavaScript, or AI."
+                )
+
+            exercises = topic_data.get(level_key)
+
+            if not exercises:
+                return (
+                    f"I don't currently have a {level} exercise for "
+                    f"{topic}. Please try another difficulty level."
+                )
+
+            exercise = exercises[0]
+
+            return json.dumps(
+                {
+                    "source": "Local educational practice dataset",
+                    "data_updated": "August 10, 2026",
+                    "topic": topic_key,
+                    "level": level_key,
+                    "question": exercise["question"],
+                    "options": exercise["options"],
+                    "answer": exercise["answer"],
+                    "explanation": exercise["explanation"],
+                },
+                ensure_ascii=False,
+            )
+
+        except Exception:
+            logger.exception("Exercise lookup failed")
+
+            return (
+                "I couldn't access the exercise data right now. "
+                "Please try again in a moment."
+            )
     @function_tool
     async def save_user_memory(
         self,
