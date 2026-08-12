@@ -3,3 +3,5 @@
 !.env.example
 .DS_Store
 backend/nexa_memory.db
+backend/escalations.json
+backend/escalations.json
