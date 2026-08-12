@@ -1,6 +1,8 @@
 
 import json
 import logging
+import uuid
+from datetime import datetime
 
 from dotenv import load_dotenv
 from livekit import rtc
@@ -187,7 +189,48 @@ Never claim:
 
 ESCALATION
 
-If a user asks for medical, legal, financial, or emergency help beyond your scope, politely explain your limitation and advise them to contact an appropriate qualified professional or service.
+ESCALATION
+
+You are a Learning & Literacy assistant.
+
+Create a human-help request only in these two situations:
+
+1. The student is clearly upset, frustrated, or overwhelmed and needs human support.
+2. The student explicitly asks to speak with a teacher or human.
+
+Before calling create_escalation:
+
+- Explain that you can create a human-help request.
+- Tell the caller what information will be shared:
+  - their user identity/reference
+  - what happened
+  - what Nexa already checked or tried
+  - urgency
+  - language preference
+  - preferred follow-up method
+- Ask for clear permission.
+
+Only call create_escalation after the caller clearly says yes.
+
+If the caller says no:
+- Do not call create_escalation.
+- Continue helping within your capabilities.
+
+Never include:
+- passwords
+- OTPs
+- PINs
+- bank details
+- account numbers
+- unnecessary private information
+
+After create_escalation succeeds:
+- Give the caller the returned reference ID.
+- Tell them the request is open.
+- Explain that a human can review it.
+- Do not promise an immediate response.
+
+Do not create an escalation for normal study questions, coding questions, quizzes, or exercises that you can reasonably answer yourself.
 """
 
 EXERCISES = {
@@ -418,6 +461,87 @@ Do not invent information that is not present here.
             "has been saved."
         )
 
+    @function_tool
+    async def create_escalation(
+        self,
+        context: RunContext,
+        reason: str,
+        problem: str,
+        checked: str,
+        urgency: str,
+        language: str,
+        follow_up_method: str,
+    ) -> str:
+        """Create a human-help request when a student needs human assistance.
+
+        Use this only after the caller has clearly given permission
+        to share the provided information with a human.
+
+        Args:
+            reason: Why human help is needed.
+            problem: Short description of the student's problem.
+            checked: What Nexa already tried or checked.
+            urgency: low, medium, high, or emergency.
+            language: Caller language preference.
+            follow_up_method: Preferred human follow-up method.
+        """
+
+        logger.info(
+            "Creating escalation for user_id=%s reason=%s urgency=%s",
+            self.user_id,
+            reason,
+            urgency,
+        )
+
+        escalation_id = f"ESC-{uuid.uuid4().hex[:6].upper()}"
+
+        escalation = {
+            "id": escalation_id,
+            "user_id": self.user_id,
+            "reason": reason,
+            "problem": problem,
+            "checked": checked,
+            "urgency": urgency,
+            "language": language,
+            "follow_up_method": follow_up_method,
+            "status": "open",
+            "created_at": datetime.now().isoformat(),
+        }
+
+        try:
+            with open("escalations.json", "r", encoding="utf-8") as f:
+                escalations = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            escalations = []
+
+        escalations.append(escalation)
+
+        with open("escalations.json", "w", encoding="utf-8") as f:
+            json.dump(
+                escalations,
+                f,
+                ensure_ascii=False,
+                indent=2,
+            )
+
+        logger.info(
+            "Human-help request created: %s",
+            json.dumps(escalation, ensure_ascii=False),
+        )
+
+        return json.dumps(
+            {
+                "success": True,
+                "reference_id": escalation_id,
+                "status": "open",
+                "message": (
+                    "Human-help request created successfully. "
+                    "Give the caller the reference ID and explain "
+                    "that a human can review the request."
+                ),
+            },
+            ensure_ascii=False,
+        )
 
 server = AgentServer()
 
