@@ -28,6 +28,7 @@ from livekit.plugins import (
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 
 from memory import get_user, save_user
+from analytics import init_analytics_db, record_call
 
 
 logger = logging.getLogger("agent")
@@ -56,6 +57,21 @@ OBJECTIVES
 3. Remember useful learning-related information only when the student gives clear permission.
 4. When a returning student is recognized, greet them by name and naturally use relevant information from their previous conversation.
 5. End every conversation with a clear next step or helpful suggestion.
+
+CALL SUCCESS
+
+A successful call means the learner successfully completes a requested
+learning exercise or clearly achieves the learning goal.
+
+A call is NOT successful just because:
+
+- the learner asks a question
+- Nexa explains a concept
+- Nexa provides an exercise
+- the learner ends the conversation
+
+If the learner successfully completes the requested learning exercise
+or clearly achieves the learning goal, use the mark_call_success tool.
 
 MEMORY
 
@@ -125,6 +141,7 @@ TOOLS
 You have access to a learning exercise tool called get_next_exercise.
 
 Use get_next_exercise automatically when the student asks for:
+
 - a practice question
 - a quiz
 - an exercise
@@ -132,17 +149,35 @@ Use get_next_exercise automatically when the student asks for:
 - a question at a particular difficulty level
 
 For example:
+
 - "Give me a beginner Python question."
 - "Quiz me on JavaScript."
 - "I want an intermediate Python exercise."
 
 When using the tool:
+
 - Do not read the returned JSON aloud.
 - Convert the result into a natural conversational response.
 - Give the question and options clearly.
 - Do not invent exercise data if the tool fails.
 - If the tool reports that data is unavailable, explain that naturally and suggest another supported topic or level.
 - Mention that the exercise comes from the local educational practice dataset when relevant.
+
+SUCCESS TRACKING
+
+You have access to a tool called mark_call_success.
+
+Use mark_call_success only when:
+
+- the student has completed the requested learning exercise successfully, or
+- the student has clearly achieved the learning goal.
+
+Do not mark a call successful just because:
+
+- the student asked a question
+- you explained a concept
+- you provided an exercise
+- the student ended the call
 
 KNOWLEDGE
 
@@ -189,8 +224,6 @@ Never claim:
 
 ESCALATION
 
-ESCALATION
-
 You are a Learning & Literacy assistant.
 
 Create a human-help request only in these two situations:
@@ -213,10 +246,12 @@ Before calling create_escalation:
 Only call create_escalation after the caller clearly says yes.
 
 If the caller says no:
+
 - Do not call create_escalation.
 - Continue helping within your capabilities.
 
 Never include:
+
 - passwords
 - OTPs
 - PINs
@@ -225,6 +260,7 @@ Never include:
 - unnecessary private information
 
 After create_escalation succeeds:
+
 - Give the caller the returned reference ID.
 - Tell them the request is open.
 - Explain that a human can review it.
@@ -232,6 +268,7 @@ After create_escalation succeeds:
 
 Do not create an escalation for normal study questions, coding questions, quizzes, or exercises that you can reasonably answer yourself.
 """
+
 
 EXERCISES = {
     "python": {
@@ -245,7 +282,7 @@ EXERCISES = {
                     "D. console.log('Hello World')",
                 ],
                 "answer": "A",
-                "explanation": "In Python, the print function is used to display text."
+                "explanation": "In Python, the print function is used to display text.",
             }
         ],
         "intermediate": [
@@ -258,9 +295,9 @@ EXERCISES = {
                     "D. Set",
                 ],
                 "answer": "C",
-                "explanation": "A dictionary stores data as key-value pairs."
+                "explanation": "A dictionary stores data as key-value pairs.",
             }
-        ]
+        ],
     },
     "javascript": {
         "beginner": [
@@ -273,7 +310,7 @@ EXERCISES = {
                     "D. int",
                 ],
                 "answer": "B",
-                "explanation": "The let keyword declares a block-scoped variable."
+                "explanation": "The let keyword declares a block-scoped variable.",
             }
         ]
     },
@@ -288,16 +325,23 @@ EXERCISES = {
                     "D. Automated Intelligence",
                 ],
                 "answer": "B",
-                "explanation": "AI stands for Artificial Intelligence."
+                "explanation": "AI stands for Artificial Intelligence.",
             }
         ]
-    }
+    },
 }
+
+
 class Assistant(Agent):
     def __init__(self, user_id: str, user_memory=None) -> None:
         self.user_id = user_id
         self.returning_user = user_memory is not None
         self.user_memory = user_memory
+
+        # Day 8 analytics:
+        # The call starts as unsuccessful.
+        # It becomes successful only when mark_call_success is used.
+        self.call_successful = False
 
         memory_context = self._build_memory_context()
 
@@ -332,6 +376,7 @@ Do not invent information that is not present here.
 
 {json.dumps(self.user_memory, ensure_ascii=False, indent=2)}
 """
+
     @function_tool
     async def get_next_exercise(
         self,
@@ -339,19 +384,7 @@ Do not invent information that is not present here.
         topic: str,
         level: str,
     ) -> str:
-        """Fetch the next practice exercise for a student's topic and level.
-
-        Use this tool when the student asks for a practice question,
-        quiz question, exercise, or coding practice for a specific topic
-        and difficulty level.
-
-        The tool should be used automatically when the student requests
-        an exercise instead of generating one from general knowledge.
-
-        Args:
-            topic: The learning topic, such as python, javascript, or ai.
-            level: The difficulty level, such as beginner or intermediate.
-        """
+        """Fetch the next practice exercise for a student's topic and level."""
 
         logger.info(
             "Fetching exercise: topic=%s level=%s",
@@ -402,6 +435,27 @@ Do not invent information that is not present here.
                 "I couldn't access the exercise data right now. "
                 "Please try again in a moment."
             )
+
+    @function_tool
+    async def mark_call_success(
+        self,
+        context: RunContext,
+    ) -> str:
+        """Mark the current learning call as successful.
+
+        Use only when the student has successfully completed
+        the learning exercise or clearly achieved the learning goal.
+        """
+
+        self.call_successful = True
+
+        logger.info(
+            "Call marked successful for user_id=%s",
+            self.user_id,
+        )
+
+        return "The learning call has been marked as successful."
+
     @function_tool
     async def save_user_memory(
         self,
@@ -410,16 +464,7 @@ Do not invent information that is not present here.
         language_preference: str,
         facts: str,
     ) -> str:
-        """Save educational information after the caller gives permission.
-
-        Only use this tool after the caller has clearly agreed to:
-        "Would you like me to remember that for our future conversations?"
-
-        Args:
-            name: The caller's name.
-            language_preference: The caller's preferred language.
-            facts: JSON string containing useful educational facts.
-        """
+        """Save educational information after the caller gives permission."""
 
         logger.info(
             "Saving memory for user_id=%s",
@@ -472,19 +517,7 @@ Do not invent information that is not present here.
         language: str,
         follow_up_method: str,
     ) -> str:
-        """Create a human-help request when a student needs human assistance.
-
-        Use this only after the caller has clearly given permission
-        to share the provided information with a human.
-
-        Args:
-            reason: Why human help is needed.
-            problem: Short description of the student's problem.
-            checked: What Nexa already tried or checked.
-            urgency: low, medium, high, or emergency.
-            language: Caller language preference.
-            follow_up_method: Preferred human follow-up method.
-        """
+        """Create a human-help request when a student needs human assistance."""
 
         logger.info(
             "Creating escalation for user_id=%s reason=%s urgency=%s",
@@ -543,6 +576,7 @@ Do not invent information that is not present here.
             ensure_ascii=False,
         )
 
+
 server = AgentServer()
 
 
@@ -559,6 +593,9 @@ async def my_agent(ctx: JobContext):
         "room": ctx.room.name,
     }
 
+    # Initialize Day 8 analytics database.
+    init_analytics_db()
+
     await ctx.connect()
 
     # Get the caller's LiveKit participant identity.
@@ -566,14 +603,17 @@ async def my_agent(ctx: JobContext):
 
     user_id = participant.identity
 
+    # Generate a unique ID for this call.
+    call_id = f"CALL-{uuid.uuid4().hex[:8].upper()}"
+
     logger.info(
-        "Caller connected: identity=%s room=%s",
+        "Caller connected: identity=%s room=%s call_id=%s",
         user_id,
         ctx.room.name,
+        call_id,
     )
 
     # Load caller memory directly in Python.
-    # Gemini does NOT need a lookup_user tool.
     user_memory = get_user(user_id)
 
     if user_memory:
@@ -608,7 +648,6 @@ async def my_agent(ctx: JobContext):
         preemptive_generation=False,
     )
 
-    # Pass the already-loaded memory directly to the Assistant.
     assistant = Assistant(
         user_id=user_id,
         user_memory=user_memory,
@@ -632,7 +671,6 @@ async def my_agent(ctx: JobContext):
     # Generate the initial greeting.
     if user_memory:
         name = user_memory.get("name", "")
-
         facts = user_memory.get("facts", {})
 
         greeting = (
@@ -658,6 +696,28 @@ async def my_agent(ctx: JobContext):
     await session.generate_reply(
         instructions=greeting
     )
+
+    # Save call analytics when the LiveKit job shuts down.
+    async def save_call_analytics():
+        outcome = (
+            "success"
+            if assistant.call_successful
+            else "failed"
+        )
+
+        record_call(
+            call_id=call_id,
+            channel="browser",
+            outcome=outcome,
+        )
+
+        logger.info(
+            "Call analytics saved: call_id=%s outcome=%s",
+            call_id,
+            outcome,
+        )
+
+    ctx.add_shutdown_callback(save_call_analytics)
 
 
 if __name__ == "__main__":
