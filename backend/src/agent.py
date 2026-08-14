@@ -1,4 +1,3 @@
-
 import json
 import logging
 import uuid
@@ -36,239 +35,250 @@ logger = logging.getLogger("agent")
 load_dotenv(".env.local")
 
 
+# ============================================================
+# SYSTEM PROMPT
+# ============================================================
+
 SYSTEM_PROMPT = """
 IDENTITY
 
 You are Nexa, a friendly AI voice assistant for students.
 
 You help students with:
-
 - study planning
 - programming
 - coding
 - AI
 - productivity
-- general academic guidance
+- academic guidance
 
-OBJECTIVES
+
+============================================================
+IMPORTANT CODING ROUTING RULE
+============================================================
+
+CODING REQUESTS MUST BE HANDED OFF.
+
+Whenever the student asks for ANY programming or coding help,
+you MUST use the transfer_to_coding_specialist tool.
+
+Do NOT solve the coding problem yourself.
+
+Do NOT ask unnecessary follow-up questions before transferring.
+
+Examples:
+
+Student:
+"Help me with a Java coding problem."
+
+Action:
+Immediately call transfer_to_coding_specialist.
+
+Student:
+"My Python code has an error."
+
+Action:
+Immediately call transfer_to_coding_specialist.
+
+Student:
+"Explain arrays in Java."
+
+Action:
+Immediately call transfer_to_coding_specialist.
+
+Student:
+"I have a DSA problem."
+
+Action:
+Immediately call transfer_to_coding_specialist.
+
+Student:
+"Help with JavaScript."
+
+Action:
+Immediately call transfer_to_coding_specialist.
+
+Student:
+"Debug this code."
+
+Action:
+Immediately call transfer_to_coding_specialist.
+
+Student:
+"Help me solve a programming problem."
+
+Action:
+Immediately call transfer_to_coding_specialist.
+
+
+CODING TOPICS INCLUDE:
+
+- Python
+- Java
+- JavaScript
+- C
+- C++
+- SQL
+- DSA
+- algorithms
+- debugging
+- programming errors
+- coding interview questions
+- code explanation
+- programming concepts
+- data structures
+- competitive programming
+
+
+Before the transfer, say only a short sentence such as:
+
+"I'll connect you with our Coding Specialist."
+
+Then immediately use the transfer_to_coding_specialist tool.
+
+After transfer, the Coding Specialist continues the conversation.
+
+Do NOT give the coding answer before transfer.
+
+
+============================================================
+GENERAL OBJECTIVES
+============================================================
 
 1. Help students create effective study plans.
-2. Explain programming and academic concepts in simple language.
-3. Remember useful learning-related information only when the student gives clear permission.
-4. When a returning student is recognized, greet them by name and naturally use relevant information from their previous conversation.
-5. End every conversation with a clear next step or helpful suggestion.
+2. Explain academic concepts in simple language.
+3. Help with productivity and learning.
+4. Remember useful educational information only with permission.
+5. End conversations with a useful next step.
 
-CALL SUCCESS
 
-A successful call means the learner successfully completes a requested
-learning exercise or clearly achieves the learning goal.
-
-A call is NOT successful just because:
-
-- the learner asks a question
-- Nexa explains a concept
-- Nexa provides an exercise
-- the learner ends the conversation
-
-If the learner successfully completes the requested learning exercise
-or clearly achieves the learning goal, use the mark_call_success tool.
-
+============================================================
 MEMORY
+============================================================
 
-Caller memory is loaded automatically before the conversation begins.
+Caller memory is loaded automatically.
 
-- Use only the memory information provided to you.
-- Never claim to remember something unless it is actually provided.
-- You may use saved learning-related information naturally when it is available.
-- Never invent or guess saved memories.
+Use only memory information provided in your context.
 
-PERMISSION RULE
+Never claim to remember information that is not available.
 
-Before saving any new personal or learning information, ask clearly:
+Before saving new learning information, ask:
 
 "Would you like me to remember that for our future conversations?"
 
-Only call save_user_memory after the caller clearly agrees.
-
-If the caller says no, do not call save_user_memory.
+Only save after clear permission.
 
 Never save:
-
-- passwords
-- OTPs
-- PINs
-- bank details
-- other sensitive information
-
-Save only useful educational information such as:
-
-- learning level
-- programming languages being learned
-- topics being studied
-- learning difficulties
-- educational goals
-- language preference
-
-RETURNING CALLERS
-
-If saved caller memory is available:
-
-- Welcome them back by name.
-- Use one relevant saved learning fact naturally.
-- Do not dump the entire memory record.
-- Do not mention the database.
-- Do not pretend to remember information that is not actually saved.
-
-LANGUAGE & SCRIPT
-
-Reply in the same language as the user.
-
-- English → English.
-- Hindi → Hindi using Devanagari script.
-- Hinglish → natural Hinglish.
-- Never write Hindi in Romanized script when the user is clearly speaking Hindi.
-
-Example:
-
-Hindi: "नमस्ते, आपका स्वागत है।"
-
-Not:
-
-"Namaste, aapka swagat hai."
-
-TOOLS
-
-You have access to a learning exercise tool called get_next_exercise.
-
-Use get_next_exercise automatically when the student asks for:
-
-- a practice question
-- a quiz
-- an exercise
-- coding practice
-- a question at a particular difficulty level
-
-For example:
-
-- "Give me a beginner Python question."
-- "Quiz me on JavaScript."
-- "I want an intermediate Python exercise."
-
-When using the tool:
-
-- Do not read the returned JSON aloud.
-- Convert the result into a natural conversational response.
-- Give the question and options clearly.
-- Do not invent exercise data if the tool fails.
-- If the tool reports that data is unavailable, explain that naturally and suggest another supported topic or level.
-- Mention that the exercise comes from the local educational practice dataset when relevant.
-
-SUCCESS TRACKING
-
-You have access to a tool called mark_call_success.
-
-Use mark_call_success only when:
-
-- the student has completed the requested learning exercise successfully, or
-- the student has clearly achieved the learning goal.
-
-Do not mark a call successful just because:
-
-- the student asked a question
-- you explained a concept
-- you provided an exercise
-- the student ended the call
-
-KNOWLEDGE
-
-You know programming, AI, study techniques, productivity, and general educational topics.
-
-If you don't know something, say so honestly.
-
-STYLE
-
-Be:
-
-- friendly
-- calm
-- encouraging
-- concise
-
-Keep responses short and natural for voice conversations.
-
-Avoid long paragraphs and complicated words.
-
-GUARDRAILS
-
-Refuse:
-
-- illegal or harmful activities
-- harmful or abusive requests
-- hateful content
-
-Do not:
-
-- provide medical diagnosis
-- prescribe medicines
-- ask for or store passwords
-- ask for or store OTPs
-- ask for or store PINs
-- ask for or store bank details
-- store sensitive personal information
-
-Never claim:
-
-- you are a human
-- you have real-time internet access unless you actually do
-- you know something when you do not
-
-ESCALATION
-
-You are a Learning & Literacy assistant.
-
-Create a human-help request only in these two situations:
-
-1. The student is clearly upset, frustrated, or overwhelmed and needs human support.
-2. The student explicitly asks to speak with a teacher or human.
-
-Before calling create_escalation:
-
-- Explain that you can create a human-help request.
-- Tell the caller what information will be shared:
-  - their user identity/reference
-  - what happened
-  - what Nexa already checked or tried
-  - urgency
-  - language preference
-  - preferred follow-up method
-- Ask for clear permission.
-
-Only call create_escalation after the caller clearly says yes.
-
-If the caller says no:
-
-- Do not call create_escalation.
-- Continue helping within your capabilities.
-
-Never include:
-
 - passwords
 - OTPs
 - PINs
 - bank details
 - account numbers
+- sensitive personal information
+
+Useful information may include:
+- learning level
+- programming languages
+- topics being studied
+- learning difficulties
+- educational goals
+- language preference
+
+
+============================================================
+LANGUAGE
+============================================================
+
+Reply in the same language as the user.
+
+English -> English.
+
+Hindi -> Hindi using Devanagari.
+
+Hinglish -> natural Hinglish.
+
+Keep voice responses short and natural.
+
+
+============================================================
+EXERCISES
+============================================================
+
+Use get_next_exercise when the student asks for:
+
+- practice question
+- quiz
+- exercise
+- coding practice question
+- question at a particular difficulty level
+
+Do not read JSON aloud.
+
+Convert the tool result into a natural response.
+
+Do not invent exercise data.
+
+
+============================================================
+SUCCESS TRACKING
+============================================================
+
+Use mark_call_success only when:
+
+- the student successfully completes a learning exercise, OR
+- the student clearly achieves the learning goal.
+
+Do NOT mark success merely because:
+- a question was asked
+- an explanation was given
+- an exercise was provided
+- the call ended
+
+
+============================================================
+ESCALATION
+============================================================
+
+Create a human-help request only when:
+
+1. The student is clearly upset/frustrated/overwhelmed and needs human support.
+2. The student explicitly asks for a teacher or human.
+
+Before create_escalation:
+- explain what will be shared
+- ask for permission
+
+Only call create_escalation after clear permission.
+
+Never include:
+- passwords
+- OTPs
+- PINs
+- bank details
 - unnecessary private information
 
-After create_escalation succeeds:
 
-- Give the caller the returned reference ID.
-- Tell them the request is open.
-- Explain that a human can review it.
-- Do not promise an immediate response.
+============================================================
+STYLE
+============================================================
 
-Do not create an escalation for normal study questions, coding questions, quizzes, or exercises that you can reasonably answer yourself.
+Be:
+- friendly
+- calm
+- encouraging
+- concise
+
+Keep responses natural for voice conversations.
+
+Never claim to be human.
+
+Never claim to have real-time internet access unless actually available.
 """
 
+
+# ============================================================
+# LOCAL EDUCATIONAL DATA
+# ============================================================
 
 EXERCISES = {
     "python": {
@@ -332,15 +342,111 @@ EXERCISES = {
 }
 
 
+# ============================================================
+# CODING SPECIALIST
+# ============================================================
+
+class CodingSpecialist(Agent):
+
+    def __init__(self) -> None:
+        super().__init__(
+            instructions="""
+You are Nexa's Coding Specialist.
+
+You specialize in:
+
+- Java
+- Python
+- JavaScript
+- C
+- C++
+- SQL
+- DSA
+- algorithms
+- debugging
+- programming concepts
+- coding interviews
+
+IMPORTANT:
+
+You are receiving the conversation after Nexa transferred
+the student to you.
+
+Do NOT restart the conversation.
+
+Continue naturally from the student's request.
+
+If the student said:
+
+"Help me with a Java coding problem"
+
+respond naturally, for example:
+
+"Sure, send me the Java problem or your code, and I'll help
+you solve it."
+
+If the student provides code:
+- analyze it carefully
+- identify the likely issue
+- explain the fix
+- provide corrected code when appropriate
+
+If the student asks a conceptual question:
+- explain it simply
+- use a small example
+
+Keep responses concise because this is a voice conversation.
+
+LANGUAGE:
+
+English -> English.
+
+Hindi -> Hindi in Devanagari.
+
+Hinglish -> natural Hinglish.
+
+Do not restart the conversation unnecessarily.
+"""
+        )
+
+
+# ============================================================
+# MAIN ASSISTANT
+# ============================================================
+
 class Assistant(Agent):
-    def __init__(self, user_id: str, user_memory=None) -> None:
+
+    @function_tool
+    async def transfer_to_coding_specialist(
+        self,
+        context: RunContext,
+    ):
+        """
+        Transfer programming and coding requests to the
+        Coding Specialist.
+        """
+
+        logger.info(
+            "CODING HANDOFF STARTED | user_id=%s",
+            self.user_id,
+        )
+
+        return (
+            CodingSpecialist(),
+            "I'll connect you with our Coding Specialist."
+        )
+
+    def __init__(
+        self,
+        user_id: str,
+        user_memory=None,
+    ) -> None:
+
         self.user_id = user_id
         self.returning_user = user_memory is not None
         self.user_memory = user_memory
 
-        # Day 8 analytics:
-        # The call starts as unsuccessful.
-        # It becomes successful only when mark_call_success is used.
+        # Day 8 analytics
         self.call_successful = False
 
         memory_context = self._build_memory_context()
@@ -349,33 +455,43 @@ class Assistant(Agent):
             instructions=SYSTEM_PROMPT + memory_context
         )
 
+    # --------------------------------------------------------
+    # MEMORY CONTEXT
+    # --------------------------------------------------------
+
     def _build_memory_context(self) -> str:
-        """Build the caller-memory context for the agent."""
 
         if not self.user_memory:
             return """
 
 CALLER MEMORY
 
-No saved memory is available for this caller.
+No saved memory is available.
 
-Do not claim that you remember previous conversations.
+Do not claim to remember previous conversations.
 """
 
         return f"""
 
 CALLER MEMORY
 
-The following information was previously saved with the caller's permission.
+Previously saved information:
 
-Use it naturally when relevant.
+{json.dumps(
+    self.user_memory,
+    ensure_ascii=False,
+    indent=2
+)}
+
+Use this information naturally when relevant.
 
 Do not mention the database.
-Do not dump the entire memory record.
-Do not invent information that is not present here.
-
-{json.dumps(self.user_memory, ensure_ascii=False, indent=2)}
+Do not invent information.
 """
+
+    # --------------------------------------------------------
+    # EXERCISE TOOL
+    # --------------------------------------------------------
 
     @function_tool
     async def get_next_exercise(
@@ -384,15 +500,15 @@ Do not invent information that is not present here.
         topic: str,
         level: str,
     ) -> str:
-        """Fetch the next practice exercise for a student's topic and level."""
 
         logger.info(
-            "Fetching exercise: topic=%s level=%s",
+            "Fetching exercise topic=%s level=%s",
             topic,
             level,
         )
 
         try:
+
             topic_key = topic.strip().lower()
             level_key = level.strip().lower()
 
@@ -400,16 +516,16 @@ Do not invent information that is not present here.
 
             if not topic_data:
                 return (
-                    f"I don't currently have a practice exercise for "
-                    f"{topic}. Please try Python, JavaScript, or AI."
+                    f"I don't currently have a practice exercise "
+                    f"for {topic}. Please try Python, JavaScript, or AI."
                 )
 
             exercises = topic_data.get(level_key)
 
             if not exercises:
                 return (
-                    f"I don't currently have a {level} exercise for "
-                    f"{topic}. Please try another difficulty level."
+                    f"I don't currently have a {level} exercise "
+                    f"for {topic}. Please try another difficulty level."
                 )
 
             exercise = exercises[0]
@@ -429,32 +545,40 @@ Do not invent information that is not present here.
             )
 
         except Exception:
-            logger.exception("Exercise lookup failed")
+
+            logger.exception(
+                "Exercise lookup failed"
+            )
 
             return (
                 "I couldn't access the exercise data right now. "
                 "Please try again in a moment."
             )
 
+    # --------------------------------------------------------
+    # SUCCESS TOOL
+    # --------------------------------------------------------
+
     @function_tool
     async def mark_call_success(
         self,
         context: RunContext,
     ) -> str:
-        """Mark the current learning call as successful.
-
-        Use only when the student has successfully completed
-        the learning exercise or clearly achieved the learning goal.
-        """
 
         self.call_successful = True
 
         logger.info(
-            "Call marked successful for user_id=%s",
+            "CALL MARKED SUCCESSFUL | user_id=%s",
             self.user_id,
         )
 
-        return "The learning call has been marked as successful."
+        return (
+            "The learning call has been marked as successful."
+        )
+
+    # --------------------------------------------------------
+    # MEMORY TOOL
+    # --------------------------------------------------------
 
     @function_tool
     async def save_user_memory(
@@ -464,7 +588,6 @@ Do not invent information that is not present here.
         language_preference: str,
         facts: str,
     ) -> str:
-        """Save educational information after the caller gives permission."""
 
         logger.info(
             "Saving memory for user_id=%s",
@@ -472,6 +595,7 @@ Do not invent information that is not present here.
         )
 
         try:
+
             parsed_facts = json.loads(facts)
 
             if not isinstance(parsed_facts, dict):
@@ -481,6 +605,7 @@ Do not invent information that is not present here.
                 )
 
         except json.JSONDecodeError:
+
             return (
                 "Memory was not saved because the facts "
                 "format was invalid."
@@ -506,6 +631,10 @@ Do not invent information that is not present here.
             "has been saved."
         )
 
+    # --------------------------------------------------------
+    # HUMAN ESCALATION
+    # --------------------------------------------------------
+
     @function_tool
     async def create_escalation(
         self,
@@ -517,16 +646,17 @@ Do not invent information that is not present here.
         language: str,
         follow_up_method: str,
     ) -> str:
-        """Create a human-help request when a student needs human assistance."""
 
         logger.info(
-            "Creating escalation for user_id=%s reason=%s urgency=%s",
+            "Creating escalation user_id=%s reason=%s urgency=%s",
             self.user_id,
             reason,
             urgency,
         )
 
-        escalation_id = f"ESC-{uuid.uuid4().hex[:6].upper()}"
+        escalation_id = (
+            f"ESC-{uuid.uuid4().hex[:6].upper()}"
+        )
 
         escalation = {
             "id": escalation_id,
@@ -542,14 +672,30 @@ Do not invent information that is not present here.
         }
 
         try:
-            with open("escalations.json", "r", encoding="utf-8") as f:
+
+            with open(
+                "escalations.json",
+                "r",
+                encoding="utf-8"
+            ) as f:
+
                 escalations = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
+
+        except (
+            FileNotFoundError,
+            json.JSONDecodeError
+        ):
+
             escalations = []
 
         escalations.append(escalation)
 
-        with open("escalations.json", "w", encoding="utf-8") as f:
+        with open(
+            "escalations.json",
+            "w",
+            encoding="utf-8"
+        ) as f:
+
             json.dump(
                 escalations,
                 f,
@@ -559,7 +705,7 @@ Do not invent information that is not present here.
 
         logger.info(
             "Human-help request created: %s",
-            json.dumps(escalation, ensure_ascii=False),
+            escalation_id,
         )
 
         return json.dumps(
@@ -568,73 +714,94 @@ Do not invent information that is not present here.
                 "reference_id": escalation_id,
                 "status": "open",
                 "message": (
-                    "Human-help request created successfully. "
-                    "Give the caller the reference ID and explain "
-                    "that a human can review the request."
+                    "Human-help request created successfully."
                 ),
             },
             ensure_ascii=False,
         )
 
 
+# ============================================================
+# SERVER
+# ============================================================
+
 server = AgentServer()
 
 
 def prewarm(proc: JobProcess):
+
     proc.userdata["vad"] = silero.VAD.load()
 
 
 server.setup_fnc = prewarm
 
 
+# ============================================================
+# LIVEKIT SESSION
+# ============================================================
+
 @server.rtc_session(agent_name="my-agent")
 async def my_agent(ctx: JobContext):
+
     ctx.log_context_fields = {
         "room": ctx.room.name,
     }
 
-    # Initialize Day 8 analytics database.
+    # Day 8 analytics
     init_analytics_db()
 
     await ctx.connect()
 
-    # Get the caller's LiveKit participant identity.
+    # Wait for browser participant
     participant = await ctx.wait_for_participant()
 
     user_id = participant.identity
 
-    # Generate a unique ID for this call.
-    call_id = f"CALL-{uuid.uuid4().hex[:8].upper()}"
+    # Unique call ID
+    call_id = (
+        f"CALL-{uuid.uuid4().hex[:8].upper()}"
+    )
 
     logger.info(
-        "Caller connected: identity=%s room=%s call_id=%s",
+        "CALL CONNECTED | identity=%s | room=%s | call_id=%s",
         user_id,
         ctx.room.name,
         call_id,
     )
 
-    # Load caller memory directly in Python.
+    # Load memory
     user_memory = get_user(user_id)
 
     if user_memory:
+
         logger.info(
             "Saved memory found for user_id=%s",
             user_id,
         )
+
     else:
+
         logger.info(
             "No saved memory found for user_id=%s",
             user_id,
         )
 
+    # ========================================================
+    # AGENT SESSION
+    # ========================================================
+
     session = AgentSession(
+
         stt=deepgram.STT(
             model="nova-3",
             language="multi",
         ),
+
+        # Keep current Gemini configuration
         llm=google.LLM(
             model="gemini-flash-latest",
         ),
+
         tts=murf.TTS(
             voice="Anisha",
             style="Conversation",
@@ -643,21 +810,29 @@ async def my_agent(ctx: JobContext):
             ),
             text_pacing=True,
         ),
+
         turn_detection=MultilingualModel(),
+
         vad=ctx.proc.userdata["vad"],
+
         preemptive_generation=False,
     )
 
+    # Create assistant
     assistant = Assistant(
         user_id=user_id,
         user_memory=user_memory,
     )
 
+    # Start session
     await session.start(
         agent=assistant,
         room=ctx.room,
+
         room_options=room_io.RoomOptions(
+
             audio_input=room_io.AudioInputOptions(
+
                 noise_cancellation=lambda params: (
                     noise_cancellation.BVCTelephony()
                     if params.participant.kind
@@ -668,28 +843,41 @@ async def my_agent(ctx: JobContext):
         ),
     )
 
-    # Generate the initial greeting.
+    # ========================================================
+    # INITIAL GREETING
+    # ========================================================
+
     if user_memory:
-        name = user_memory.get("name", "")
-        facts = user_memory.get("facts", {})
+
+        name = user_memory.get(
+            "name",
+            ""
+        )
+
+        facts = user_memory.get(
+            "facts",
+            {}
+        )
 
         greeting = (
             f"Welcome back, {name}! "
-            "Greet the caller warmly and naturally mention "
-            "one relevant learning fact from their saved memory. "
-            "Keep the greeting short and conversational."
+            "Greet the caller warmly and naturally. "
+            "Mention one relevant learning fact from memory "
+            "if available. Keep it short."
         )
 
         if facts:
+
             greeting += (
-                " Use the saved learning information provided "
-                "in your context, but do not mention the database."
+                " Use the saved learning information "
+                "naturally without mentioning the database."
             )
 
     else:
+
         greeting = (
-            "Greet the caller warmly as Nexa and start "
-            "a friendly conversation. "
+            "Greet the caller warmly as Nexa. "
+            "Start a friendly conversation. "
             "Keep the greeting short and natural."
         )
 
@@ -697,8 +885,12 @@ async def my_agent(ctx: JobContext):
         instructions=greeting
     )
 
-    # Save call analytics when the LiveKit job shuts down.
+    # ========================================================
+    # ANALYTICS ON SHUTDOWN
+    # ========================================================
+
     async def save_call_analytics():
+
         outcome = (
             "success"
             if assistant.call_successful
@@ -712,14 +904,19 @@ async def my_agent(ctx: JobContext):
         )
 
         logger.info(
-            "Call analytics saved: call_id=%s outcome=%s",
+            "CALL ANALYTICS SAVED | call_id=%s | outcome=%s",
             call_id,
             outcome,
         )
 
-    ctx.add_shutdown_callback(save_call_analytics)
+    ctx.add_shutdown_callback(
+        save_call_analytics
+    )
 
+
+# ============================================================
+# RUN
+# ============================================================
 
 if __name__ == "__main__":
     cli.run_app(server)
-
